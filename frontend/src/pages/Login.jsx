@@ -1,5 +1,47 @@
-
+import { useState } from 'react'
 function Login() {
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+
+    const [message, setMessage] = useState('')
+    const [loading, setLoading] = useState(false)
+
+    async function handleLogin(event) {
+    event.preventDefault()
+
+    setMessage('')
+    setLoading(true)
+
+    try {
+        const response = await fetch(
+            'http://127.0.0.1:5000/api/login',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }
+        )
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Login failed')
+        }
+
+        setMessage('Login successful!')
+
+    } catch (error) {
+        setMessage(error.message)
+
+    } finally {
+        setLoading(false)
+    }
+}
 
     return (
         <div className="auth-page">
@@ -12,29 +54,38 @@ function Login() {
                     Login to continue to Connectify.
                 </p>
 
-                <form>
+                <form onSubmit={handleLogin}>
 
                     <div className="form-group">
                         <label>Email Address</label>
                         <input
-                            type="email"
-                            placeholder="Enter your email"
+                             type="email"
+                             placeholder="Enter your email"
+                             value={email}
+                             onChange={(event) => setEmail(event.target.value)}
                         />
                     </div>
 
                     <div className="form-group">
                         <label>Password</label>
                         <input
-                            type="password"
-                            placeholder="Enter your password"
+                             type="password"
+                             placeholder="Enter your password"
+                             value={password}
+                             onChange={(event) => setPassword(event.target.value)}
                         />
                     </div>
 
-                    <button type="submit" className="signup-btn">
-                        Login
-                    </button>
+                    <button
+                      type="submit"
+                      className="signup-btn"
+                      disabled={loading}
+                    >
+    {loading ? 'Logging in...' : 'Login'}
+</button>
 
                 </form>
+                {message && <p className="auth-switch">{message}</p>}
 
                 <p className="auth-switch">
                     Don't have an account?
