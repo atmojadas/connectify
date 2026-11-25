@@ -1,4 +1,7 @@
+from werkzeug.security import check_password_hash
 
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import IntegrityError
@@ -284,3 +287,77 @@ def delete_user(user_id):
             "status": "error",
             "message": "Unable to delete user"
         }), 500
+
+
+# User Login
+@users_bp.route("/login", methods=["POST"])
+def login():
+
+    # Get data sent by the client
+    data = request.get_json()
+
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+
+    # Validate input
+    if not email or not password:
+        return jsonify({
+            "status": "error",
+            "message": "Email and password are required"
+        }), 400
+
+    # Find user in database
+    user = User.query.filter_by(email=email).first()
+
+    # Verify user and password
+    if user is None or not check_password_hash(
+        user.password_hash, password
+    ):
+        return jsonify({
+            "status": "error",
+            "message": "Invalid email or password"
+        }), 401
+
+    # Generate JWT access token
+    access_token = create_access_token(
+        identity=str(user.id)
+    )
+
+    # Send token to client
+    return jsonify({
+        "status": "success",
+        "message": "Login successful",
+        "access_token": access_token,
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email
+        }
+    }), 200
+
+
+    # Protected User Profile
+@users_bp.route("/profile", methods=["GET"])
+@jwt_required()
+def get_profile():
+
+    # Get user ID from JWT
+    user_id = get_jwt_identity()
+
+    # Find user in database
+    user = User.query.get(int(user_id))
+
+    if user is None:
+        return jsonify({
+            "status": "error",
+            "message": "User not found"
+        }), 404
+
+    return jsonify({
+        "status": "success",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email
+        }
+    }), 200
