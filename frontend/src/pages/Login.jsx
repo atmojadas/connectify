@@ -5,6 +5,8 @@ function Login() {
 
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
+    const [token, setToken] = useState('')
+    const [profile, setProfile] = useState(null)
 
     async function handleLogin(event) {
     event.preventDefault()
@@ -30,10 +32,16 @@ function Login() {
         const data = await response.json()
 
         if (!response.ok) {
-            throw new Error(data.message || 'Login failed')
-        }
+    throw new Error(data.message || 'Login failed')
+}
 
-        setMessage('Login successful!')
+// Store the JWT token returned by Flask
+setToken(data.access_token)
+
+// Fetch the logged-in user's profile
+await fetchProfile(data.access_token)
+
+setMessage('Login successful! Profile loaded.')
 
     } catch (error) {
         setMessage(error.message)
@@ -41,6 +49,27 @@ function Login() {
     } finally {
         setLoading(false)
     }
+}
+
+async function fetchProfile(authToken) {
+
+    const response = await fetch(
+        'http://127.0.0.1:5000/api/profile',
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Could not fetch profile')
+    }
+
+    setProfile(data)
 }
 
     return (
