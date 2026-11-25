@@ -1,16 +1,19 @@
 
 from flask import Flask
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 
-from app.routes.health import health_bp
+db = SQLAlchemy()
 
 
 def create_app():
 
-    # Create Flask application
     app = Flask(__name__)
 
-    # Enable communication with React
+    app.config.from_object("app.config.Config")
+
+    db.init_app(app)
+
     CORS(
         app,
         resources={
@@ -20,7 +23,19 @@ def create_app():
         }
     )
 
-    # Register API routes
-    app.register_blueprint(health_bp, url_prefix="/api")
+    # Import routes
+    from app.routes.health import health_bp
+    from app.routes.users import users_bp
+
+    # Register routes
+    app.register_blueprint(
+        health_bp,
+        url_prefix="/api"
+    )
+
+    app.register_blueprint(
+        users_bp,
+        url_prefix="/api"
+    )
 
     return app
