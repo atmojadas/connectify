@@ -1,0 +1,338 @@
+
+/* Main application */
+.app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Navigation bar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px 8%;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--bg-primary);
+}
+
+/* Logo */
+.logo {
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: -1px;
+}
+
+.logo span {
+    color: var(--accent);
+}
+
+/* Navigation links */
+.nav-links {
+    display: flex;
+    gap: 35px;
+}
+
+.nav-links a {
+    color: var(--text-secondary);
+    font-size: 15px;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: var(--accent);
+}
+
+/* Navigation buttons */
+.nav-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+/* Common button styles */
+.login-btn,
+.signup-btn,
+.explore-btn {
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+/* Login button */
+.login-btn {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.login-btn:hover {
+    border-color: var(--accent);
+}
+
+/* Signup button */
+.signup-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+}
+
+.signup-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+/* Hero section */
+.hero-section {
+    min-height: 570px;
+    display: flex;
+    align-items: center;
+    padding: 70px 8%;
+    background:
+        radial-gradient(
+            circle at 80% 40%,
+            rgba(139, 92, 246, 0.16),
+            transparent 35%
+        );
+}
+
+/* Hero content */
+.hero-content {
+    max-width: 750px;
+}
+
+/* Small hero heading */
+.hero-tag {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    margin-bottom: 25px;
+}
+
+/* Main heading */
+.hero-content h1 {
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 1.15;
+    letter-spacing: -2px;
+    margin-bottom: 25px;
+}
+
+.hero-content h1 span {
+    color: var(--accent);
+}
+
+/* Hero description */
+.hero-description {
+    color: var(--text-secondary);
+    font-size: 17px;
+    line-height: 1.8;
+    max-width: 600px;
+    margin-bottom: 32px;
+}
+
+/* Hero buttons */
+.hero-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+/* Explore button */
+.explore-btn {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.explore-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Features section */
+.features-section {
+    padding: 75px 8%;
+    text-align: center;
+}
+
+/* Features heading */
+.features-section h2 {
+    font-size: 34px;
+    margin-bottom: 12px;
+}
+
+/* Section description */
+.section-description {
+    color: var(--text-secondary);
+    margin-bottom: 45px;
+}
+
+/* Feature cards container */
+.features-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+}
+
+/* Individual feature card */
+.feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 35px 25px;
+    text-align: left;
+    transition: 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+}
+
+/* Feature card heading */
+.feature-card h3 {
+    font-size: 21px;
+    margin-bottom: 15px;
+}
+
+/* Feature card paragraph */
+.feature-card p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+
+    .navbar {
+        padding: 20px 5%;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        gap: 25px;
+    }
+
+    .hero-section {
+        padding: 65px 6%;
+        min-height: 480px;
+    }
+
+    .hero-content h1 {
+        font-size: 42px;
+    }
+
+    .features-section {
+        padding: 55px 6%;
+    }
+
+    .features-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .logo {
+        font-size: 22px;
+    }
+
+    .nav-buttons {
+        gap: 7px;
+    }
+
+    .login-btn,
+    .signup-btn {
+        padding: 9px 12px;
+    }
+
+    .hero-content h1 {
+        font-size: 35px;
+    }
+
+    .hero-buttons {
+        flex-wrap: wrap;
+    }
+}
+
+
+
+/* Authentication Pages */
+
+.auth-page {
+    min-height: calc(100vh - 90px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 35px;
+}
+
+.auth-card h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.auth-description {
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 13px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+}
+
+.form-group input:focus {
+    border-color: var(--accent);
+}
+
+.form-group input::placeholder {
+    color: var(--text-secondary);
+}
+
+.auth-card form button {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 24px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.auth-switch a {
+    color: var(--accent);
+    font-weight: 600;
+}
