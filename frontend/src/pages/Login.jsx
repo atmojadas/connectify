@@ -1,5 +1,7 @@
+import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 function Login() {
+    const navigate = useNavigate()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
@@ -7,6 +9,7 @@ function Login() {
     const [loading, setLoading] = useState(false)
     const [token, setToken] = useState('')
     const [profile, setProfile] = useState(null)
+
 
     async function handleLogin(event) {
     event.preventDefault()
@@ -35,11 +38,17 @@ function Login() {
     throw new Error(data.message || 'Login failed')
 }
 
-// Store the JWT token returned by Flask
 setToken(data.access_token)
 
 // Fetch the logged-in user's profile
-await fetchProfile(data.access_token)
+const profileData = await fetchProfile(data.access_token)
+
+// Navigate to Profile and pass the profile data
+navigate('/profile', {
+    state: {
+        profile: profileData
+    }
+})
 
 setMessage('Login successful! Profile loaded.')
 
@@ -70,6 +79,7 @@ async function fetchProfile(authToken) {
     }
 
     setProfile(data)
+    return data
 }
 
     return (
