@@ -1,13 +1,9 @@
-import { useLocation } from 'react-router-dom'
+
+import { useAuth } from '../context/AuthContext'
 
 function Profile() {
 
-    const location = useLocation()
-
-    // Receive profile information from the previous page
-    const profileData = location.state?.profile
-
-    const user = profileData?.user || profileData
+    const { user } = useAuth()
 
     return (
         <div className="auth-page">

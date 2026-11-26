@@ -1,5 +1,6 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 function Login() {
     const navigate = useNavigate()
     const [email, setEmail] = useState('')
@@ -7,8 +8,7 @@ function Login() {
 
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
-    const [token, setToken] = useState('')
-    const [profile, setProfile] = useState(null)
+    const { login } = useAuth()
 
 
     async function handleLogin(event) {
@@ -38,17 +38,17 @@ function Login() {
     throw new Error(data.message || 'Login failed')
 }
 
-setToken(data.access_token)
-
 // Fetch the logged-in user's profile
 const profileData = await fetchProfile(data.access_token)
 
-// Navigate to Profile and pass the profile data
-navigate('/profile', {
-    state: {
-        profile: profileData
-    }
-})
+// Save authentication information globally
+login(
+    data.access_token,
+    profileData.user || profileData
+)
+
+// Navigate to the profile page
+navigate('/profile')
 
 setMessage('Login successful! Profile loaded.')
 
@@ -78,7 +78,6 @@ async function fetchProfile(authToken) {
         throw new Error(data.message || 'Could not fetch profile')
     }
 
-    setProfile(data)
     return data
 }
 
@@ -128,7 +127,7 @@ async function fetchProfile(authToken) {
 
                 <p className="auth-switch">
                     Don't have an account?
-                    <a href="/register"> Register</a>
+                    <Link to="/register"> Register</Link>
                 </p>
 
             </div>

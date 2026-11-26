@@ -32,6 +32,7 @@ def create_app():
     # Import routes
     from app.routes.health import health_bp
     from app.routes.users import users_bp
+    from app.routes.posts import posts_bp
 
     # Register routes
     app.register_blueprint(
@@ -42,6 +43,10 @@ def create_app():
     app.register_blueprint(
         users_bp,
         url_prefix="/api"
+    )
+    app.register_blueprint(
+    posts_bp,
+    url_prefix="/api"
     )
 
     return app
