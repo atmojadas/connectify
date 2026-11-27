@@ -33,6 +33,12 @@ def create_app():
     from app.routes.health import health_bp
     from app.routes.users import users_bp
     from app.routes.posts import posts_bp
+    from app.routes.comments import comments_bp
+
+        app.register_blueprint(
+        comments_bp,
+        url_prefix="/api"
+    )
 
     # Register routes
     app.register_blueprint(

@@ -4,14 +4,108 @@ import { useAuth } from '../../context/AuthContext'
 
 function PostCard({ post, onPostUpdated, onPostDeleted }) {
 
-    const { token, user } = useAuth()
+    const { token, user, apiFetch } = useAuth()
 
     const [isEditing, setIsEditing] = useState(false)
     const [editedContent, setEditedContent] = useState(post.content)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
 
-    // Check whether this post belongs to the logged-in user
+    // COMMENTS STATE
+    const [comments, setComments] = useState([])
+    const [showComments, setShowComments] = useState(false)
+    const [commentsLoaded, setCommentsLoaded] = useState(false)
+    const [commentContent, setCommentContent] = useState('')
+    const [commentsLoading, setCommentsLoading] = useState(false)
+    const [commentSubmitting, setCommentSubmitting] = useState(false)
+    const [commentsError, setCommentsError] = useState('')
+
+    // FETCH COMMENTS
+    async function handleToggleComments() {
+
+        const nextState = !showComments
+        setShowComments(nextState)
+
+        if (nextState && !commentsLoaded) {
+
+            setCommentsLoading(true)
+            setCommentsError('')
+
+            try {
+                const response = await apiFetch(
+                    `http://127.0.0.1:5000/api/posts/${post.id}/comments`
+                )
+
+                const data = await response.json()
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Unable to load comments')
+                }
+
+                setComments(data.comments)
+                setCommentsLoaded(true)
+
+            } catch (error) {
+                setCommentsError(error.message)
+            } finally {
+                setCommentsLoading(false)
+            }
+        }
+    }
+
+    // ADD COMMENT
+    async function handleAddComment(event) {
+
+        event.preventDefault()
+
+        if (!commentContent.trim()) {
+            setCommentsError('Comment cannot be empty')
+            return
+        }
+
+        if (!token) {
+            setCommentsError('Please log in to comment')
+            return
+        }
+
+        setCommentSubmitting(true)
+        setCommentsError('')
+
+        try {
+            const response = await apiFetch(
+                `http://127.0.0.1:5000/api/posts/${post.id}/comments`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: commentContent
+                    })
+                }
+            )
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Unable to add comment')
+            }
+
+            setComments((previousComments) => [
+                ...previousComments,
+                data.comment
+            ])
+
+            setCommentContent('')
+
+        } catch (error) {
+            setCommentsError(error.message)
+        } finally {
+            setCommentSubmitting(false)
+        }
+    }
+
+    // CHECK POST OWNERSHIP
     const isOwner = user && Number(user.id) === Number(post.user_id)
 
     // UPDATE POST
@@ -26,13 +120,12 @@ function PostCard({ post, onPostUpdated, onPostDeleted }) {
         setError('')
 
         try {
-            const response = await fetch(
+            const response = await apiFetch(
                 `http://127.0.0.1:5000/api/posts/${post.id}`,
                 {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         content: editedContent
@@ -69,13 +162,10 @@ function PostCard({ post, onPostUpdated, onPostDeleted }) {
         setError('')
 
         try {
-            const response = await fetch(
+            const response = await apiFetch(
                 `http://127.0.0.1:5000/api/posts/${post.id}`,
                 {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    method: 'DELETE'
                 }
             )
 
@@ -142,14 +232,17 @@ function PostCard({ post, onPostUpdated, onPostDeleted }) {
                     <div className="post-edit-form">
 
                         <textarea
+                            className="post-edit-textarea"
                             value={editedContent}
                             onChange={(event) =>
                                 setEditedContent(event.target.value)
                             }
                             rows="4"
+                            placeholder="Edit your post..."
                         />
 
                         <button
+                            className="post-edit-button"
                             type="button"
                             onClick={handleUpdate}
                             disabled={loading}
@@ -170,12 +263,11 @@ function PostCard({ post, onPostUpdated, onPostDeleted }) {
 
             <div className="post-actions">
 
-                <button type="button">
-                    ♡ <span>Like</span>
-                </button>
-
-                <button type="button">
-                    ◯ <span>Comment</span>
+                <button
+                    type="button"
+                    onClick={handleToggleComments}
+                >
+                    ◯ <span>Comment ({comments.length})</span>
                 </button>
 
                 <button type="button">
@@ -183,6 +275,72 @@ function PostCard({ post, onPostUpdated, onPostDeleted }) {
                 </button>
 
             </div>
+
+            {/* COMMENTS SECTION */}
+
+            {showComments && (
+                <div className="comments-section">
+
+                    <h4>Comments</h4>
+
+                    {commentsLoading && (
+                        <p>Loading comments...</p>
+                    )}
+
+                    {commentsError && (
+                        <p className="post-error">
+                            {commentsError}
+                        </p>
+                    )}
+
+                    {!commentsLoading && comments.length === 0 && (
+                        <p>No comments yet. Be the first to comment!</p>
+                    )}
+
+                    <div className="comments-list">
+
+                        {comments.map((comment) => (
+                            <div
+                                className="comment-item"
+                                key={comment.id}
+                            >
+
+                                <strong>{comment.username}</strong>
+
+                                <p>{comment.content}</p>
+
+                                <small>{comment.created_at}</small>
+
+                            </div>
+                        ))}
+
+                    </div>
+
+                    <form
+                        className="comment-form"
+                        onSubmit={handleAddComment}
+                    >
+
+                        <input
+                            type="text"
+                            placeholder="Write a comment..."
+                            value={commentContent}
+                            onChange={(event) =>
+                                setCommentContent(event.target.value)
+                            }
+                        />
+
+                        <button
+                            type="submit"
+                            disabled={commentSubmitting}
+                        >
+                            {commentSubmitting ? 'Posting...' : 'Post'}
+                        </button>
+
+                    </form>
+
+                </div>
+            )}
 
         </article>
     )
