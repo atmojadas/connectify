@@ -7,6 +7,7 @@ import PostCard from '../components/dashboard/PostCard'
 import RightSidebar from '../components/dashboard/RightSidebar'
 
 function Home() {
+
     const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -15,9 +16,14 @@ function Home() {
         fetchPosts()
     }, [])
 
+    // READ POSTS
     async function fetchPosts() {
+
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/posts')
+            const response = await fetch(
+                'http://127.0.0.1:5000/api/posts'
+            )
+
             const data = await response.json()
 
             if (!response.ok) {
@@ -25,18 +31,40 @@ function Home() {
             }
 
             setPosts(data.posts)
+
         } catch (error) {
             setError(error.message)
+
         } finally {
             setLoading(false)
         }
     }
 
+    // UPDATE POST IN THE FEED
+    function handlePostUpdated(updatedPost) {
+
+        setPosts((previousPosts) =>
+            previousPosts.map((post) =>
+                post.id === updatedPost.id ? updatedPost : post
+            )
+        )
+    }
+
+    // REMOVE POST FROM THE FEED
+    function handlePostDeleted(postId) {
+
+        setPosts((previousPosts) =>
+            previousPosts.filter((post) => post.id !== postId)
+        )
+    }
+
     return (
         <div className="dashboard-layout">
+
             <Sidebar />
 
             <main className="dashboard-feed">
+
                 <div className="feed-heading">
                     <div>
                         <h1>Your Feed</h1>
@@ -45,27 +73,43 @@ function Home() {
                 </div>
 
                 <PostComposer
-    onPostCreated={(newPost) => {
-        setPosts((previousPosts) => [newPost, ...previousPosts])
-    }}
-/>
+                    onPostCreated={(newPost) => {
+                        setPosts((previousPosts) => [
+                            newPost,
+                            ...previousPosts
+                        ])
+                    }}
+                />
 
                 <div className="feed-posts">
+
                     {loading && <p>Loading posts...</p>}
 
                     {error && <p>{error}</p>}
 
                     {!loading && !error && posts.length === 0 && (
-                        <p>No posts yet. Be the first to share something!</p>
+                        <p>
+                            No posts yet. Be the first to share something!
+                        </p>
                     )}
 
                     {posts.map((post) => (
-                        <PostCard key={post.id} post={post} />
+
+                        <PostCard
+                            key={post.id}
+                            post={post}
+                            onPostUpdated={handlePostUpdated}
+                            onPostDeleted={handlePostDeleted}
+                        />
+
                     ))}
+
                 </div>
+
             </main>
 
             <RightSidebar />
+
         </div>
     )
 }
