@@ -1,8 +1,8 @@
-
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+
 
 db = SQLAlchemy()
 jwt = JWTManager()
@@ -29,30 +29,44 @@ def create_app():
         }
     )
 
+    # Import database models
+    from app.models.like import Like
+
     # Import routes
     from app.routes.health import health_bp
     from app.routes.users import users_bp
     from app.routes.posts import posts_bp
     from app.routes.comments import comments_bp
+    from app.routes.likes import likes_bp
 
-        app.register_blueprint(
-        comments_bp,
-        url_prefix="/api"
-    )
-
-    # Register routes
+    # Register Health routes
     app.register_blueprint(
         health_bp,
         url_prefix="/api"
     )
 
+    # Register User routes
     app.register_blueprint(
         users_bp,
         url_prefix="/api"
     )
+
+    # Register Post routes
     app.register_blueprint(
-    posts_bp,
-    url_prefix="/api"
+        posts_bp,
+        url_prefix="/api"
+    )
+
+    # Register Comment routes
+    app.register_blueprint(
+        comments_bp,
+        url_prefix="/api"
+    )
+
+    # Register Like routes
+    app.register_blueprint(
+        likes_bp,
+        url_prefix="/api"
     )
 
     return app

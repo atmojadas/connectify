@@ -1,5 +1,4 @@
-
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 
 function PostCard({ post, onPostUpdated, onPostDeleted }) {
@@ -19,6 +18,83 @@ function PostCard({ post, onPostUpdated, onPostDeleted }) {
     const [commentsLoading, setCommentsLoading] = useState(false)
     const [commentSubmitting, setCommentSubmitting] = useState(false)
     const [commentsError, setCommentsError] = useState('')
+    const [likeCount, setLikeCount] = useState(0)
+    const [likedByUser, setLikedByUser] = useState(false)
+    const [likesLoading, setLikesLoading] = useState(true)
+    const [likesError, setLikesError] = useState('')
+
+    // FETCH LIKES
+useEffect(() => {
+
+    async function fetchLikes() {
+
+        setLikesLoading(true)
+        setLikesError('')
+
+        try {
+            const response = await apiFetch(
+                `http://127.0.0.1:5000/api/posts/${post.id}/likes`
+            )
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Unable to load likes')
+            }
+
+            setLikeCount(data.like_count)
+            setLikedByUser(data.liked_by_user)
+
+        } catch (error) {
+            setLikesError(error.message)
+        } finally {
+            setLikesLoading(false)
+        }
+    }
+
+    fetchLikes()
+
+}, [post.id, apiFetch])
+
+// LIKE / UNLIKE A POST
+async function handleToggleLike() {
+
+    if (!token) {
+        setLikesError('Please log in to like a post')
+        return
+    }
+
+    setLikesLoading(true)
+    setLikesError('')
+
+    try {
+        const response = await apiFetch(
+            `http://127.0.0.1:5000/api/posts/${post.id}/likes`,
+            {
+                method: likedByUser ? 'DELETE' : 'POST'
+            }
+        )
+
+        const data = await response.json()
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Unable to update like')
+        }
+
+        setLikedByUser(!likedByUser)
+
+        setLikeCount((previousCount) =>
+            likedByUser
+                ? Math.max(previousCount - 1, 0)
+                : previousCount + 1
+        )
+
+    } catch (error) {
+        setLikesError(error.message)
+    } finally {
+        setLikesLoading(false)
+    }
+}
 
     // FETCH COMMENTS
     async function handleToggleComments() {
@@ -263,12 +339,29 @@ function PostCard({ post, onPostUpdated, onPostDeleted }) {
 
             <div className="post-actions">
 
+                {likesError && (
+    <p className="post-error">
+        {likesError}
+    </p>
+)}
+
                 <button
                     type="button"
                     onClick={handleToggleComments}
                 >
                     ◯ <span>Comment ({comments.length})</span>
                 </button>
+
+                <button
+    type="button"
+    onClick={handleToggleLike}
+    disabled={likesLoading}
+>
+    {likedByUser ? '♥' : '♡'}
+    <span>
+        {likedByUser ? 'Liked' : 'Like'} ({likeCount})
+    </span>
+</button>
 
                 <button type="button">
                     ↗ <span>Share</span>
